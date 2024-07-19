@@ -30,6 +30,21 @@ namespace Microsoft.Maui.Platform
 			return (bool)(_respondsToSafeArea = RespondsToSelector(new Selector("safeAreaInsets")));
 		}
 
+		CGSize AdjustForSafeArea(CGSize size)
+		{
+			if (KeyboardAutoManagerScroll.ShouldIgnoreSafeAreaAdjustment)
+				KeyboardAutoManagerScroll.ShouldScrollAgain = true;
+
+			if (View is not ISafeAreaView sav || sav.IgnoreSafeArea || !RespondsToSafeArea())
+			{
+				return size;
+			}
+
+#pragma warning disable CA1416 // TODO 'UIView.SafeAreaInsets' is only supported on: 'ios' 11.0 and later, 'maccatalyst' 11.0 and later, 'tvos' 11.0 and later.
+			return SafeAreaInsets.InsetRect(new CGRect(0, 0, size.Width, size.Height)).Size;
+#pragma warning restore CA1416
+		}
+
 		protected CGRect AdjustForSafeArea(CGRect bounds)
 		{
 			if (KeyboardAutoManagerScroll.ShouldIgnoreSafeAreaAdjustment)
@@ -95,6 +110,8 @@ namespace Microsoft.Maui.Platform
 				return base.SizeThatFits(size);
 			}
 
+			size = AdjustForSafeArea(size);
+			
 			var widthConstraint = size.Width;
 			var heightConstraint = size.Height;
 
