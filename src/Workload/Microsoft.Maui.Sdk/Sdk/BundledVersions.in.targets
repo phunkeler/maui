@@ -18,6 +18,16 @@
       https://learn.microsoft.com/nuget/consume-packages/Central-Package-Management
     -->
     <DisableMauiImplicitPackageReferences Condition=" '$(ManagePackageVersionsCentrally)' == 'true' and '$(DisableMauiImplicitPackageReferences)' == '' ">true</DisableMauiImplicitPackageReferences>
+
+    <!--
+      These versions are the minimum supported versions for .NET MAUI. If the user specifies a lower version,
+      it will be increased to the minimum supported version.
+    -->
+    <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</_MauiDefaultSupportedOSPlatformVersion>
+    <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</_MauiDefaultSupportedOSPlatformVersion>
+    <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</_MauiDefaultSupportedOSPlatformVersion>
+    <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</_MauiDefaultSupportedOSPlatformVersion>
+    <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</_MauiDefaultSupportedOSPlatformVersion>
   </PropertyGroup>
 
   <!-- .NET MAUI version for telemetry: this is the installed workload in use, not the final version in the app -->
