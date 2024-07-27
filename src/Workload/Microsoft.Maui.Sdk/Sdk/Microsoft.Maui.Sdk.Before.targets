@@ -34,16 +34,16 @@
     <_MauiPreviousTargetPlatformMinVersion>$(TargetPlatformMinVersion)</_MauiPreviousTargetPlatformMinVersion>
     <_MauiSupportedOSPlatformVersionWasAndroidMinimum Condition="'$(SupportedOSPlatformVersion)' != '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' and $([MSBuild]::VersionEquals('$(AndroidMinimumSupportedApiLevel).0', '$(SupportedOSPlatformVersion)'))">true</_MauiSupportedOSPlatformVersionWasAndroidMinimum>
     <!-- Windows has 2 properties that could be set, so if only 1 is set we copy it to the other. -->
-    <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(TargetPlatformMinVersion)' == ''">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(SupportedOSPlatformVersion)' == ''">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
+    <TargetPlatformMinVersion   Condition="'$(TargetPlatformMinVersion)'  ==  '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' != '' and '$(MauiDisableSupportedOSPlatformVersionValidation)' != 'true' and '$(MauiDisableOverrideSupportedOSPlatformVersion)' != 'true'">
     <!-- Record it the explicit version was lower than what we support so we can increase and log later. -->
     <_MauiHadToIncreaseSupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' != '' and $([MSBuild]::VersionGreaterThan('$(_MauiMinimumSupportedOSPlatformVersion)', '$(SupportedOSPlatformVersion)'))">true</_MauiHadToIncreaseSupportedOSPlatformVersion>
-    <_MauiHadToIncreaseTargetPlatformMinVersion   Condition="'$(TargetPlatformMinVersion)'  !=  '' and $([MSBuild]::VersionGreaterThan('$(_MauiMinimumSupportedOSPlatformVersion)', '$(TargetPlatformMinVersion)'))">true</_MauiHadToIncreaseTargetPlatformMinVersion>
+    <_MauiHadToIncreaseTargetPlatformMinVersion   Condition="'$(TargetPlatformMinVersion)'  !=  '' and $([MSBuild]::VersionGreaterThan('$(_MauiMinimumSupportedOSPlatformVersion)', '$(TargetPlatformMinVersion)')) and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">true</_MauiHadToIncreaseTargetPlatformMinVersion>
     <!-- Override the version numbers if they are too low. -->
     <SupportedOSPlatformVersion Condition="'$(_MauiHadToIncreaseSupportedOSPlatformVersion)' == 'true'">$(_MauiMinimumSupportedOSPlatformVersion)</SupportedOSPlatformVersion>
-    <TargetPlatformMinVersion   Condition="'$(_MauiHadToIncreaseTargetPlatformMinVersion)' == 'true'   and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(_MauiMinimumSupportedOSPlatformVersion)</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion   Condition="'$(_MauiHadToIncreaseTargetPlatformMinVersion)' == 'true' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(_MauiMinimumSupportedOSPlatformVersion)</TargetPlatformMinVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)' != '' and '$(MauiDisableSupportedOSPlatformVersionValidation)' != 'true' and '$(MauiDisableImplicitSupportedOSPlatformVersion)' != 'true'">
     <!-- Specify the version numbers if they are missing. -->
