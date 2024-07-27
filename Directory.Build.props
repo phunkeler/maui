@@ -137,7 +137,7 @@
 
   <!-- Do not check the version numbers for the maui repo -->
   <PropertyGroup>
-    <MauiDisableSupportedOSPlatformVersionValidation>false</MauiDisableSupportedOSPlatformVersionValidation>
+    <MauiDisableSupportedOSPlatformVersionValidation>true</MauiDisableSupportedOSPlatformVersionValidation>
   </PropertyGroup>
 
   <Import Condition="Exists('Directory.Build.Override.props')" Project="Directory.Build.Override.props" />
