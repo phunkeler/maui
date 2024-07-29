@@ -42,7 +42,7 @@
     <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tvos'">10.0</_MauiDefaultSupportedOSPlatformVersion>
     <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</_MauiDefaultSupportedOSPlatformVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(UsingMicrosoftAspNetCoreComponentsWebViewMaui)' == 'true'">
+  <PropertyGroup Condition="'$(UsingMicrosoftAspNetCoreComponentsWebViewMaui)' == 'true' and '$(UsingMicrosoftNETSdkRazor)' == 'true'">
     <!-- .NET MAUI Blazor Hybrid -->
     <_MauiMinimumSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</_MauiMinimumSupportedOSPlatformVersion>
     <_MauiDefaultSupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</_MauiDefaultSupportedOSPlatformVersion>
