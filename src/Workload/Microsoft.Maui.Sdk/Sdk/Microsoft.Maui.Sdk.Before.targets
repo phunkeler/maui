@@ -32,7 +32,7 @@
     <!-- Capture the current version information for logging. -->
     <_MauiPreviousSupportedOSPlatformVersion>$(SupportedOSPlatformVersion)</_MauiPreviousSupportedOSPlatformVersion>
     <_MauiPreviousTargetPlatformMinVersion>$(TargetPlatformMinVersion)</_MauiPreviousTargetPlatformMinVersion>
-    <_MauiSupportedOSPlatformVersionWasAndroidMinimum Condition="'$(SupportedOSPlatformVersion)' != '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' and $([MSBuild]::VersionEquals('$(AndroidMinimumSupportedApiLevel).0', '$(SupportedOSPlatformVersion)'))">true</_MauiSupportedOSPlatformVersionWasAndroidMinimum>
+    <_MauiSupportedOSPlatformVersionWasAndroidMinimum Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' and '$(AndroidMinimumSupportedApiLevel)' != '' and '$(SupportedOSPlatformVersion)' != '' and $([MSBuild]::VersionEquals('$(AndroidMinimumSupportedApiLevel).0', '$(SupportedOSPlatformVersion)'))">true</_MauiSupportedOSPlatformVersionWasAndroidMinimum>
     <!-- Windows has 2 properties that could be set, so if only 1 is set we copy it to the other. -->
     <TargetPlatformMinVersion   Condition="'$(TargetPlatformMinVersion)'  ==  '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(SupportedOSPlatformVersion)</TargetPlatformMinVersion>
     <SupportedOSPlatformVersion Condition="'$(SupportedOSPlatformVersion)' == '' and $([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">$(TargetPlatformMinVersion)</SupportedOSPlatformVersion>
