@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Handlers;
@@ -8,7 +9,7 @@ using Xunit;
 namespace Microsoft.Maui.DeviceTests
 {
 	[Category(TestCategory.HybridWebView)]
-	public class HybridWebViewTests : ControlsHandlerTestBase
+	public partial class HybridWebViewTests : ControlsHandlerTestBase
 	{
 		void SetupBuilder()
 		{
@@ -136,7 +137,11 @@ namespace Microsoft.Maui.DeviceTests
 					var x = 123.456m;
 					var y = 654.321m;
 
-					var result = await hybridWebView.InvokeJavaScriptAsync<ComputationResult>("AddNumbers", x, y);
+					var result = await hybridWebView.InvokeJavaScriptAsync<ComputationResult>(
+						"AddNumbers",
+						ComputationResultContext.Default.ComputationResult,
+						new object[] { x, y },
+						new[] { ComputationResultContext.Default.Decimal, ComputationResultContext.Default.Decimal });
 
 					Assert.NotNull(result);
 					Assert.Equal(777.777m, result.result);
@@ -149,6 +154,14 @@ namespace Microsoft.Maui.DeviceTests
 		{
 			public decimal result { get; set; }
 			public string operationName { get; set; }
+		}
+
+		[JsonSourceGenerationOptions(WriteIndented = true)]
+		[JsonSerializable(typeof(ComputationResult))]
+		[JsonSerializable(typeof(decimal))]
+		[JsonSerializable(typeof(string))]
+		internal partial class ComputationResultContext : JsonSerializerContext
+		{
 		}
 	}
 }

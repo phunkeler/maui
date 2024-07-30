@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using Microsoft.Maui.Controls;
 
 namespace Maui.Controls.Sample.Pages
@@ -18,9 +19,13 @@ namespace Maui.Controls.Sample.Pages
 
 		private async void InvokeJSMethodButton_Clicked(object sender, EventArgs e)
 		{
-			var x = 123;
-			var y = 321;
-			var result = await hwv.InvokeJavaScriptAsync<ComputationResult>("AddNumbers", x, y);
+			var x = 123d;
+			var y = 321d;
+			var result = await hwv.InvokeJavaScriptAsync<ComputationResult>(
+				"AddNumbers",
+				ComputationResultContext.Default.ComputationResult,
+				new object[] { x, y },
+				new[] { ComputationResultContext.Default.Double, ComputationResultContext.Default.Double });
 
 			if (result is null)
 			{
@@ -41,6 +46,14 @@ namespace Maui.Controls.Sample.Pages
 		{
 			public double result { get; set; }
 			public string? operationName { get; set; }
+		}
+
+		[JsonSourceGenerationOptions(WriteIndented = true)]
+		[JsonSerializable(typeof(ComputationResult))]
+		[JsonSerializable(typeof(double))]
+		[JsonSerializable(typeof(string))]
+		internal partial class ComputationResultContext : JsonSerializerContext
+		{
 		}
 	}
 }

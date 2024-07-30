@@ -2,6 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Maui.Devices;
+#if WINDOWS || ANDROID || IOS || MACCATALYST
+using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
+#endif
 
 namespace Microsoft.Maui.Controls
 {
@@ -65,24 +69,44 @@ namespace Microsoft.Maui.Controls
 		/// </summary>
 		/// <param name="methodName">The name of the JavaScript method to invoke.</param>
 		/// <param name="paramValues">Optional array of objects to be passed to the JavaScript method.</param>
+		/// <param name="paramJsonTypeInfos">Optional array of metadata about serializing the types of the parameters specified by <paramref name="paramValues"/>.</param>
 		/// <returns>A string containing the return value of the called method.</returns>
-		[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = TrimmerJustification)]
-		[System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = TrimmerJustification)]
-		public async Task<string?> InvokeJavaScriptAsync(string methodName, params object[] paramValues)
+#if WINDOWS || ANDROID || IOS || MACCATALYST
+		public async Task<string?> InvokeJavaScriptAsync(string methodName, object?[]? paramValues, JsonTypeInfo?[]? paramJsonTypeInfos = null)
 		{
-#if !WINDOWS && !ANDROID && !IOS && !MACCATALYST
-			await Task.Delay(0);
-			throw new NotImplementedException();
-#else
 			if (string.IsNullOrEmpty(methodName))
 			{
 				throw new ArgumentException($"The method name cannot be null or empty.", nameof(methodName));
 			}
+			if (paramValues != null && paramJsonTypeInfos == null)
+			{
+				throw new ArgumentException($"The parameter values were provided, but the parameter JSON type infos were not.", nameof(paramJsonTypeInfos));
+			}
+			if (paramValues == null && paramJsonTypeInfos != null)
+			{
+				throw new ArgumentException($"The parameter JSON type infos were provided, but the parameter values were not.", nameof(paramValues));
+			}
+			if (paramValues != null && paramValues.Length != paramJsonTypeInfos!.Length)
+			{
+				throw new ArgumentException($"The number of parameter values does not match the number of parameter JSON type infos.", nameof(paramValues));
+			}
 
-			var js = $"{methodName}({(paramValues == null ? string.Empty : string.Join(", ", paramValues.Select(v => System.Text.Json.JsonSerializer.Serialize(v))))})";
+			var paramsValuesString =
+				paramValues == null
+				? string.Empty
+				: string.Join(
+					", ",
+					paramValues.Select((v, i) => (v == null ? "null" : JsonSerializer.Serialize(v, paramJsonTypeInfos![i]!))));
+
+			var js = $"{methodName}({paramsValuesString})";
 			return await EvaluateJavaScriptAsync(js);
-#endif
 		}
+#else
+		public Task<string?> InvokeJavaScriptAsync(string methodName, object?[]? paramValues = null, object?[]? paramJsonTypeInfos = null)
+		{
+			throw new NotImplementedException();
+		}
+#endif
 
 		/// <summary>
 		/// Invokes a JavaScript method named <paramref name="methodName"/> and optionally passes in the parameter values specified
@@ -90,25 +114,27 @@ namespace Microsoft.Maui.Controls
 		/// </summary>
 		/// <typeparam name="TReturnType">The type of the return value to deserialize from JSON.</typeparam>
 		/// <param name="methodName">The name of the JavaScript method to invoke.</param>
+		/// <param name="returnTypeJsonTypeInfo">Metadata about deserializing the type of the return value specified by <typeparamref name="TReturnType"/>.</param>
 		/// <param name="paramValues">Optional array of objects to be passed to the JavaScript method by JSON-encoding each one.</param>
+		/// <param name="paramJsonTypeInfos">Optional array of metadata about serializing the types of the parameters specified by <paramref name="paramValues"/>.</param>
 		/// <returns>An object of type <typeparamref name="TReturnType"/> containing the return value of the called method.</returns>
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("AOT", "IL3050:Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.", Justification = TrimmerJustification)]
-		[System.Diagnostics.CodeAnalysis.SuppressMessage("Trimming", "IL2026:Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code", Justification = TrimmerJustification)]
-		public async Task<TReturnType?> InvokeJavaScriptAsync<TReturnType>(string methodName, params object[] paramValues)
+#if WINDOWS || ANDROID || IOS || MACCATALYST
+		public async Task<TReturnType?> InvokeJavaScriptAsync<TReturnType>(string methodName, JsonTypeInfo<TReturnType?> returnTypeJsonTypeInfo, object?[]? paramValues = null, JsonTypeInfo?[]? paramJsonTypeInfos = null)
 		{
-#if !WINDOWS && !ANDROID && !IOS && !MACCATALYST
-			await Task.Delay(0);
-			throw new NotImplementedException();
-#else
-			var stringResult = await InvokeJavaScriptAsync(methodName, paramValues);
+			var stringResult = await InvokeJavaScriptAsync(methodName, paramValues, paramJsonTypeInfos);
 
 			if (stringResult is null)
 			{
 				return default;
 			}
-			return System.Text.Json.JsonSerializer.Deserialize<TReturnType>(stringResult);
-#endif
+			return JsonSerializer.Deserialize<TReturnType?>(stringResult, returnTypeJsonTypeInfo);
+	}
+#else
+		public Task<TReturnType?> InvokeJavaScriptAsync<TReturnType>(string methodName, object returnTypeJsonTypeInfo, object?[]? paramValues, object?[]? paramJsonTypeInfos)
+		{
+			throw new NotImplementedException();
 		}
+#endif
 
 		/// <inheritdoc/>
 		public async Task<string?> EvaluateJavaScriptAsync(string script)
