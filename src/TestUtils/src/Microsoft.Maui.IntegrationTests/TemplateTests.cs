@@ -253,15 +253,14 @@ namespace Microsoft.Maui.IntegrationTests
 			// the new .NET 9 templates do not have the SupportedOSPlatformVersion set, but the old .NET 8
 			// workload assumes they do. This property will tell the new workload that this is a blazor
 			// project and that it nees to use the new blazor version numbers.
-			if (framework == DotNetPrevious)
+			var extendedBuildProps = new List<string>(BuildProps);
+			if (framework == DotNetPrevious && id.Contains("blazor", StringComparison.OrdinalIgnoreCase))
 			{
-				FileUtilities.ReplaceInFile(projectFile,
-					"</Project>",
-					"<UsingMicrosoftAspNetCoreComponentsWebViewMaui>true</UsingMicrosoftAspNetCoreComponentsWebViewMaui></Project>");
+				extendedBuildProps.Add("UsingMicrosoftAspNetCoreComponentsWebViewMaui=true");
 			}
 
 			string target = shouldPack ? "Pack" : "";
-			Assert.IsTrue(DotnetInternal.Build(projectFile, config, target: target, properties: BuildProps),
+			Assert.IsTrue(DotnetInternal.Build(projectFile, config, target: target, properties: extendedBuildProps),
 				$"Project {Path.GetFileName(projectFile)} failed to build. Check test output/attachments for errors.");
 		}
 
