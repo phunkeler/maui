@@ -56,7 +56,7 @@ namespace Microsoft.Maui.ApplicationModel
 		/// Provides the default implementation for static usage of this API.
 		/// </summary>
 		public static IActivityStateManager Default =>
-			defaultImplementation ??= new ActivityStateManagerImplementation();
+			defaultImplementation ??= new ActivityStateManagerImplementation(); // Is this up-to-date on Android X? Should we do any distinction here?
 
 		internal static void SetDefault(IActivityStateManager? implementation) =>
 			defaultImplementation = implementation;
@@ -66,7 +66,7 @@ namespace Microsoft.Maui.ApplicationModel
 	{
 		ActivityLifecycleContextListener? lifecycleListener;
 
-		public Activity? GetCurrentActivity() => lifecycleListener?.Activity;
+		public Activity? GetCurrentActivity() => lifecycleListener?.Activity; // Can we return "AndroiX" yet?
 
 		public event EventHandler<ActivityStateChangedEventArgs>? ActivityStateChanged;
 
@@ -81,8 +81,13 @@ namespace Microsoft.Maui.ApplicationModel
 			if (activity.Application is not Application application)
 				throw new InvalidOperationException("Activity was not attached to an application.");
 
+			// Entry-point to Android's new Activity Result API's.
+			// TODO: 
+			//	1. Why wouldn't this always be "MauiAppCompatActivity"?
 			if (activity is ComponentActivity componentActivity)
-				PickVisualMediaForResult.Register(componentActivity);
+			{
+				new MauiActivityResultRegistrar(componentActivity).RegisterAll();
+			}
 
 			Init(application);
 			lifecycleListener!.Activity = activity;

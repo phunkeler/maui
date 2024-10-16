@@ -29,10 +29,15 @@ namespace Microsoft.Maui.Media
 				.SetMediaType(photo ? ActivityResultContracts.PickVisualMedia.ImageOnly.Instance : ActivityResultContracts.PickVisualMedia.VideoOnly.Instance)
 				.Build();
 
-			var androidUri = await PickVisualMediaForResult.Launch(pickVisualMediaRequest);
-			var path = FileSystemUtils.EnsurePhysicalPath(androidUri);
+			var result = await MauiActivityResultRegistrar.Launch<ActivityResultContracts.PickVisualMedia>(pickVisualMediaRequest);
 
-			return new FileResult(path);
+			if (result is AndroidUri androidUri)
+			{
+				var path = FileSystemUtils.EnsurePhysicalPath(androidUri);
+				return new FileResult(path);
+			}
+
+			return new();
 		}
 
 		public Task<FileResult> CapturePhotoAsync(MediaPickerOptions options)
